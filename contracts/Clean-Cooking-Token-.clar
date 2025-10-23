@@ -320,3 +320,28 @@
     (try! (ft-mint? clean-cooking-token total-supply contract-owner))
     (map-set authorized-verifiers contract-owner true)
 )
+(define-private (batch-transfer-step
+        (item {
+            to: principal,
+            amount: uint,
+        })
+        (acc (response bool uint))
+    )
+    (match acc
+        okv (ft-transfer? clean-cooking-token (get amount item) tx-sender
+            (get to item)
+        )
+        errv
+        acc
+    )
+)
+
+(define-public (batch-transfer (transfers (list 50 {
+    to: principal,
+    amount: uint,
+})))
+    (begin
+        (asserts! (> (len transfers) u0) err-invalid-amount)
+        (fold batch-transfer-step transfers (ok true))
+    )
+)
